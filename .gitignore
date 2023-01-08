@@ -605,3 +605,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# png jpg
+*.png
+*.jpg
+*.jpeg
