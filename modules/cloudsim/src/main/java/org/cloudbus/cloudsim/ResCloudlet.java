@@ -226,6 +226,8 @@ public class ResCloudlet {
 		return cloudlet.getCloudletId();
 	}
 
+	
+
 	/**
 	 * Gets the user or owner of this Cloudlet.
 	 * 

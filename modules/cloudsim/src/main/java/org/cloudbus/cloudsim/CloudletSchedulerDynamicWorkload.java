@@ -148,6 +148,16 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		}
 		return totalUtilization;
 	}
+	// wxh
+	@Override
+	public double getTotalUtilizationOfCpuPredict(double time) {
+		double totalUtilization = 0;
+		for (ResCloudlet rcl : getCloudletExecList()) {
+			totalUtilization += rcl.getCloudlet().getUtilizationOfCpuPredict(time);
+		}
+		return totalUtilization;
+	}
+
 
 	@Override
 	public List<Double> getCurrentRequestedMips() {
@@ -156,6 +166,27 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		}
 		List<Double> currentMips = new ArrayList<>();
 		double totalMips = getTotalUtilizationOfCpu(getPreviousTime()) * getTotalMips();
+		double mipsForPe = totalMips / getNumberOfPes();
+
+		for (int i = 0; i < getNumberOfPes(); i++) {
+			currentMips.add(mipsForPe);
+		}
+
+		setCachePreviousTime(getPreviousTime());
+		setCacheCurrentRequestedMips(currentMips);
+
+		return currentMips;
+	}
+
+	// wxh 这个大体不用改， getTotalUtilizationOfCpu这里改成预测后的VM整体利用率
+	@Override
+	public List<Double> getNextRequestedMips() {
+		// 这个函数要注意，暂时先不管 这个好像是防止同一时间多次访问current导致多次load 而设置的，应该不会影响我的代码
+		if (getCachePreviousTime() == getPreviousTime()) {
+			return getCacheCurrentRequestedMips();
+		}
+		List<Double> currentMips = new ArrayList<>();
+		double totalMips = getTotalUtilizationOfCpuPredict(getPreviousTime()) * getTotalMips();
 		double mipsForPe = totalMips / getNumberOfPes();
 
 		for (int i = 0; i < getNumberOfPes(); i++) {

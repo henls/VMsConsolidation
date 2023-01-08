@@ -27,5 +27,6 @@ public interface UtilizationModel {
 	 * @return utilization percentage, from [0 to 1]
 	 */
 	double getUtilization(double time);
+	double getUtilizationPredict(double time);
 
 }

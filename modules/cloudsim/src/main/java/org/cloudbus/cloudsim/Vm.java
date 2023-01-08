@@ -173,6 +173,22 @@ public class Vm {
 		return currentRequestedMips;
 	}
 
+	/** wxh
+	 * Gets the Next request mips.
+	 * 
+	 * @return the Next requested mips
+	 */
+	public List<Double> getNextRequestedMips() {
+		List<Double> NextRequestedMips = getCloudletScheduler().getNextRequestedMips();
+		if (isBeingInstantiated()) {
+			NextRequestedMips = new ArrayList<>();
+			for (int i = 0; i < getNumberOfPes(); i++) {
+				NextRequestedMips.add(getMips());
+			}
+		}
+		return NextRequestedMips;
+	}
+
 	/**
 	 * Gets the current requested total mips.
 	 * 
@@ -181,6 +197,19 @@ public class Vm {
 	public double getCurrentRequestedTotalMips() {
 		double totalRequestedMips = 0;
 		for (double mips : getCurrentRequestedMips()) {
+			totalRequestedMips += mips;
+		}
+		return totalRequestedMips;
+	}
+
+	/** wxh
+	 * Gets the current requested total mips.
+	 * 
+	 * @return the current requested total mips
+	 */
+	public double getNextRequestedTotalMips() {
+		double totalRequestedMips = 0;
+		for (double mips : getNextRequestedMips()) {
 			totalRequestedMips += mips;
 		}
 		return totalRequestedMips;

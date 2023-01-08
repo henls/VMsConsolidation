@@ -108,7 +108,9 @@ public class PowerVmAllocationPolicyMigrationInterQuartileRangePrediction extend
 		addHistoryEntry(host, upperThreshold);
 		double totalRequestedMips = 0;
 		for (Vm vm : host.getVmList()) {
-			totalRequestedMips += vm.getCurrentRequestedTotalMips();
+			// totalRequestedMips += vm.getCurrentRequestedTotalMips();
+			// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
+			totalRequestedMips += vm.getNextRequestedTotalMips();
 		}
 		double utilization = totalRequestedMips / host.getTotalMips();
 		return utilization > upperThreshold;

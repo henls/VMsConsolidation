@@ -194,11 +194,27 @@ public abstract class CloudletScheduler {
 	public abstract double getTotalUtilizationOfCpu(double time);
 
 	/**
+	 * Gets total CPU utilization percentage of all cloudlets, according to CPU UtilizationModel of 
+         * each one.
+	 * 
+	 * @param time the time to get the current CPU utilization
+	 * @return total utilization
+	 */
+	public abstract double getTotalUtilizationOfCpuPredict(double time);
+
+	/**
 	 * Gets the current requested mips.
 	 * 
 	 * @return the current mips
 	 */
 	public abstract List<Double> getCurrentRequestedMips();
+
+	/** wxh
+	 * Gets the Next request mips.
+	 * 
+	 * @return the Next mips (predict)
+	 */
+	public abstract List<Double> getNextRequestedMips();
 
 	/**
 	 * Gets the total current available mips for the Cloudlet.

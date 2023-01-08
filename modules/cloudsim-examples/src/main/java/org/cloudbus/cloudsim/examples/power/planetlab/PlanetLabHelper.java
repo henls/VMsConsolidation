@@ -70,4 +70,49 @@ public class PlanetLabHelper {
 		return list;
 	}
 
+	/** wxh
+	 * Creates the cloudlet list planet lab.
+	 * 
+	 * @param brokerId the broker id
+	 * @param inputFolderName the input folder name
+	 * @return the list
+	 * @throws FileNotFoundException the file not found exception
+	 */
+	public static List<Cloudlet> createCloudletListPlanetLab(int brokerId, String inputFolderName, boolean predictor)
+			throws FileNotFoundException {
+		List<Cloudlet> list = new ArrayList<>();
+
+		long fileSize = 300;
+		long outputSize = 300;
+		UtilizationModel utilizationModelNull = new UtilizationModelNull();
+
+		File inputFolder = new File(inputFolderName);
+		File[] files = inputFolder.listFiles();
+
+		for (int i = 0; i < files.length; i++) {
+			Cloudlet cloudlet = null;
+			String cloudletName = files[i].getName();
+			try {
+				cloudlet = new Cloudlet(
+						i,
+						Constants.CLOUDLET_LENGTH,
+						Constants.CLOUDLET_PES,
+						fileSize,
+						outputSize,
+						cloudletName,
+						new UtilizationModelPlanetLabInMemory(
+								files[i].getAbsolutePath(),
+								Constants.SCHEDULING_INTERVAL), utilizationModelNull, utilizationModelNull);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+			cloudlet.setUserId(brokerId);
+			cloudlet.setVmId(i);
+			list.add(cloudlet);
+		}
+
+		return list;
+	}
+
 }

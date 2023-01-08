@@ -76,6 +76,20 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		return utilization;
 
 	}
+	// wxh 这里调模型，做预测，从其他几天的数据中生成预训练模型并保存，这个模型负责读模型，微调，然后预测。
+	@Override
+	public double getUtilizationPredict(double time) {
+		if (time % getSchedulingInterval() == 0) {
+			return data[(int) time / (int) getSchedulingInterval()];
+		}
+		int time1 = (int) Math.floor(time / getSchedulingInterval());
+		int time2 = (int) Math.ceil(time / getSchedulingInterval());
+		double utilization1 = data[time1];
+		double utilization2 = data[time2];
+		double delta = (utilization2 - utilization1) / ((time2 - time1) * getSchedulingInterval());
+		double utilization = utilization1 + delta * (time - time1 * getSchedulingInterval());
+		return utilization;
+	}
 
 	/**
 	 * Sets the scheduling interval.
