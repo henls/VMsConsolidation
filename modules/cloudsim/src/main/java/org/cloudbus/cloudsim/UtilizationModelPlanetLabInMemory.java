@@ -154,11 +154,11 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 				Socket socket = new Socket("127.0.0.1",12345);
 				PrintStream out = new PrintStream(socket.getOutputStream());
 				DecimalFormat decimalFormat = new DecimalFormat("0.000");
+				System.out.println(currentUtil);
 				out.print(Arrays.toString(previousData) + "$" + 
 					Arrays.toString(Arrays.copyOfRange(data, 0, (int) time / (int) getSchedulingInterval() - 1)) + "$" + 
 					decimalFormat.format(currentUtil)
 				);
-				System.out.println(currentUtil);
 				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(),"utf-8"));
 				char[] rDataLen = new char[100];
 				br.read(rDataLen, 0, 100);
