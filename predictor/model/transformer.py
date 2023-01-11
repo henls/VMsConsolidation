@@ -15,8 +15,10 @@ np.random.seed(0)
 input_window = 20
 output_window = 1
 batch_size = 64
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device='cpu'
 print(device)
+
 
 class PositionalEncoding(nn.Module):
 

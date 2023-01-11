@@ -9,7 +9,9 @@ import torch
 import numpy as np
 import signal
 import socket
+from TorchMLP import MLPRegress
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MLP(object):
 
@@ -40,7 +42,10 @@ class MLP(object):
                 data = data.squeeze().reshape(1, -1)
                 target = target.squeeze()[-1]
                 target = torch.tensor([target])
-                output = eval_model(data)
+                try:
+                    output = eval_model(data).to('cpu')
+                except Exception as e:
+                    output = eval_model(data)
                 output = torch.tensor(output)
                 total_loss += self.criterion(output, target).item()
                 test_result = torch.cat((test_result, output[-1].view(-1).cpu()), 0)
@@ -54,23 +59,53 @@ class MLP(object):
         plt.grid(True, which='both')
         plt.axhline(y=0, color='k')
         plt.legend()
-        plt.savefig('graph/{}.png'.format(filename.split('/')[-1]))
+        plt.savefig('predictor/graph/{}.png'.format(filename.split('/')[-1]))
         plt.close()
 
         return total_loss / i
+
     def testLaunch(self):
-        dirnames = glob(r'./VMs_usage/*')
+        dirnames = glob(r'predictor/VMs_usage/*')
         self.criterion = nn.MSELoss()
         for filename in dirnames:
-            if 'adam_ee_ntu_edu_tw_uw_oneswarm' not in filename:
+            # if 'adam_ee_ntu_edu_tw_uw_oneswarm' not in filename:
+            #     continue
+            if 'planetlab6_goto_info_waseda_ac_jp_uw_oneswarm' not in filename:
                 continue
             train_data, val_data = get_data(filename)
             model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
-            # if os.path.exists('graph/{}.png'.format(filename.split('/')[-1])):
+            # if os.path.exists('predictor/graph/{}.png'.format(filename.split('/')[-1])):
             #     print(filename)
             #     continue
             epoch_start_time = time.time()
 
+            train_data_x, train_target_y = get_batch(train_data, 0, 1484)
+            train_data_x = train_data_x.squeeze().transpose(1, 0)
+            train_target_y = train_target_y.squeeze().transpose(1, 0)[:, -1]
+            model.fit(train_data_x, train_target_y)
+
+            val_loss = self.plot_and_loss(model.predict, val_data, filename)
+            print('-' * 89)
+            print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.5f} | valid ppl {:8.2f}'.format(1, (
+                        time.time() - epoch_start_time), val_loss, math.exp(val_loss)))
+            print('-' * 89)
+
+    def testTorchMLP(self):
+        dirnames = glob(r'predictor/VMs_usage/*')
+        self.criterion = nn.MSELoss()
+        for filename in dirnames:
+            # if 'adam_ee_ntu_edu_tw_uw_oneswarm' not in filename:
+            #     continue
+            if 'planetlab6_goto_info_waseda_ac_jp_uw_oneswarm' not in filename:
+                continue
+            train_data, val_data = get_data(filename)
+            # model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+            model = MLPRegress(20, 30, 20, 1)
+
+            # if os.path.exists('graph/{}.png'.format(filename.split('/')[-1])):
+            #     print(filename)
+            #     continue
+            epoch_start_time = time.time()
             train_data_x, train_target_y = get_batch(train_data, 0, 1484)
             train_data_x = train_data_x.squeeze().transpose(1, 0)
             train_target_y = train_target_y.squeeze().transpose(1, 0)[:, -1]
@@ -126,5 +161,7 @@ class MLP(object):
 
 if __name__ == '__main__':
     model = MLP()
-    model.predict()
+    # model.predict()
+    # model.testLaunch()
+    model.testTorchMLP()
         
