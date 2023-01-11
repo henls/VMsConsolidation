@@ -166,29 +166,31 @@ def plot_and_loss(eval_model, data_source, filename):
 
     return total_loss / i
 
-dirnames = glob(r'./predictor/VMs_usage/*')
-for filename in dirnames:
-    train_data, val_data = get_data(filename)
-    model = TransAm().to(device)
-    criterion = nn.MSELoss()
-    # lr = 0.005
-    lr = 0.001
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.97)
-    epochs = 100 # The number of epochs
-    if os.path.exists('./predictor/graph/{}.png'.format(filename.split('/')[-1])):
-        continue
-    for epoch in range(1, epochs + 1):
-        epoch_start_time = time.time()
-        train(train_data)
+if __name__ == '__main__':
 
-        if (epoch % 100 == 0):
-            val_loss = plot_and_loss(model, val_data, filename)
-        else:
-            val_loss = evaluate(model, val_data)
+    dirnames = glob(r'./predictor/VMs_usage/*')
+    for filename in dirnames:
+        train_data, val_data = get_data(filename)
+        model = TransAm().to(device)
+        criterion = nn.MSELoss()
+        # lr = 0.005
+        lr = 0.001
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.97)
+        epochs = 100 # The number of epochs
+        if os.path.exists('./predictor/graph/{}.png'.format(filename.split('/')[-1])):
+            continue
+        for epoch in range(1, epochs + 1):
+            epoch_start_time = time.time()
+            train(train_data)
 
-        print('-' * 89)
-        print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.5f} | valid ppl {:8.2f}'.format(epoch, (
-                    time.time() - epoch_start_time), val_loss, math.exp(val_loss)))
-        print('-' * 89)
-        scheduler.step()
+            if (epoch % 100 == 0):
+                val_loss = plot_and_loss(model, val_data, filename)
+            else:
+                val_loss = evaluate(model, val_data)
+
+            print('-' * 89)
+            print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.5f} | valid ppl {:8.2f}'.format(epoch, (
+                        time.time() - epoch_start_time), val_loss, math.exp(val_loss)))
+            print('-' * 89)
+            scheduler.step()

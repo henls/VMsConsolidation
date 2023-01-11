@@ -7,12 +7,18 @@ import java.io.InputStreamReader;
 import java.lang.Runtime;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
-
+import java.net.InetAddress;
+import java.net.Socket;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import org.cloudbus.cloudsim.util.MathUtil;
 
 /**
  * Defines the resource utilization model based on 
@@ -47,10 +53,11 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 	 */
 	public UtilizationModelPlanetLabInMemory(String inputPath, double schedulingInterval)
 			throws NumberFormatException,
-			IOException, ParameterException {
+			IOException{
 		filePath = inputPath;
 		data = new double[289];
-		cloudletName = inputPath.split("/")[-1];
+		String [] splitPath = inputPath.split("/");
+		cloudletName = splitPath[splitPath.length - 1];
 		setSchedulingInterval(schedulingInterval);
 		BufferedReader input = new BufferedReader(new FileReader(inputPath));
 		int n = data.length;
@@ -60,7 +67,15 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		data[n - 1] = data[n - 2];
 		input.close();
 		// Load previous data
-		previousData = LoadPreviousData(cloudletName);
+		try {
+			previousData = LoadPreviousData(cloudletName);
+		for (double d : previousData) {
+			System.out.println(d);
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	/**
@@ -102,7 +117,7 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 
 	}
 	// wxh 这里调模型，做预测，从其他几天的数据中生成预训练模型并保存，这个模型负责读模型，微调，然后预测。
-	@Override
+	// @Override
 	public double getUtilizationPredict(double time) {
 
 		// model = ;
@@ -123,14 +138,39 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		}
 
 		String ans = "";
+		double predictedUtilization = 0.;
 		try {
-			String command = "python ./predictor/model/transformerAPI.py " + previousData + " " + Arrays.copyOfRange(data, (int) time / (int) getSchedulingInterval() - 10, (int) time / (int) getSchedulingInterval() - 1) + " " + currentUtil;
-			Process process = Runtime.getRuntime().exec(command);
-			ans = getResults(process);
+			if (previousData.length + (int) time / (int) getSchedulingInterval() < 30){
+				int length = 10;
+				double[] utilizationHistoryReversed = new double[length];
+				for (int i = 0; i < length; i++) {
+					utilizationHistoryReversed[i] = data[length - i - 1];
+				}
+				double[] estimates = null;
+				estimates = MathUtil.getLoessParameterEstimates(utilizationHistoryReversed);
+				double migrationIntervals = 1.;
+				predictedUtilization = estimates[0] + estimates[1] * (length + migrationIntervals);
+			}else{
+				Socket socket = new Socket("127.0.0.1",12345);
+				PrintStream out = new PrintStream(socket.getOutputStream());
+				DecimalFormat decimalFormat = new DecimalFormat("0.000");
+				out.print(Arrays.toString(previousData) + "$" + 
+					Arrays.toString(Arrays.copyOfRange(data, 0, (int) time / (int) getSchedulingInterval() - 1)) + "$" + 
+					decimalFormat.format(currentUtil)
+				);
+				System.out.println(currentUtil);
+				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(),"utf-8"));
+				char[] rDataLen = new char[100];
+				br.read(rDataLen, 0, 100);
+				ans = new String(rDataLen);
+				ans = ans.trim();
+				predictedUtilization = Double.parseDouble(ans.substring(1, ans.length()-2));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(0);
 		}
-		return Double.parseDouble(ans);
+		return predictedUtilization;
 	}
 
 	public double[] LoadPreviousData(String cloudletName) throws ParameterException, FileNotFoundException{
@@ -200,4 +240,6 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 	public double[] getData(){
 		return data;
 	}
+
+	
 }

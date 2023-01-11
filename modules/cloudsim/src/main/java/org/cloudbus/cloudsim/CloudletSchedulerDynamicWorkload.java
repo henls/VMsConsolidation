@@ -50,10 +50,14 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	/** The cache of the previous time when the {@link #getCurrentRequestedMips()} was called. */
 	private double cachePreviousTime;
 
+	private double cachePreviousTimePredict;
+
 	/** The cache of the last current requested MIPS. 
          * @see  #getCurrentRequestedMips() 
          */
 	private List<Double> cacheCurrentRequestedMips;
+
+	private List<Double> cacheNextRequestedMips;
 
 	/**
 	 * Instantiates a new VM scheduler
@@ -182,9 +186,11 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	@Override
 	public List<Double> getNextRequestedMips() {
 		// 这个函数要注意，暂时先不管 这个好像是防止同一时间多次访问current导致多次load 而设置的，应该不会影响我的代码
-		if (getCachePreviousTime() == getPreviousTime()) {
-			return getCacheCurrentRequestedMips();
+		if (getCachePreviousTimePredict() == getPreviousTime()) {
+			return getCacheNextRequestedMips();
 		}
+		// 这个只有每次step往前走才会到这，但是调用的是getCurrentRequestedMips，
+		// 改上面的会影响所有的仿真步，所以把上面的条件和下面的set函数注释掉
 		List<Double> currentMips = new ArrayList<>();
 		double totalMips = getTotalUtilizationOfCpuPredict(getPreviousTime()) * getTotalMips();
 		double mipsForPe = totalMips / getNumberOfPes();
@@ -193,8 +199,8 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 			currentMips.add(mipsForPe);
 		}
 
-		setCachePreviousTime(getPreviousTime());
-		setCacheCurrentRequestedMips(currentMips);
+		setCachePreviousTimePredict(getPreviousTime());
+		setCacheNextRequestedMips(currentMips);
 
 		return currentMips;
 	}
@@ -349,6 +355,10 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		return cachePreviousTime;
 	}
 
+	protected double getCachePreviousTimePredict() {
+		return cachePreviousTimePredict;
+	}
+
 	/**
 	 * Sets the cache of previous time.
 	 * 
@@ -356,6 +366,10 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	 */
 	protected void setCachePreviousTime(double cachePreviousTime) {
 		this.cachePreviousTime = cachePreviousTime;
+	}
+
+	protected void setCachePreviousTimePredict(double cachePreviousTime) {
+		this.cachePreviousTimePredict = cachePreviousTime;
 	}
 
 	/**
@@ -367,6 +381,10 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		return cacheCurrentRequestedMips;
 	}
 
+	protected List<Double> getCacheNextRequestedMips() {
+		return cacheNextRequestedMips;
+	}
+
 	/**
 	 * Sets the cache of current requested mips.
 	 * 
@@ -374,6 +392,10 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	 */
 	protected void setCacheCurrentRequestedMips(List<Double> cacheCurrentRequestedMips) {
 		this.cacheCurrentRequestedMips = cacheCurrentRequestedMips;
+	}
+
+	protected void setCacheNextRequestedMips(List<Double> cacheNextRequestedMips) {
+		this.cacheNextRequestedMips = cacheNextRequestedMips;
 	}
 
 }
