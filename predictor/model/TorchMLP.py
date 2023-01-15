@@ -6,6 +6,9 @@ import numpy as np
 import time
 
 from sklearn.neural_network import MLPRegressor
+from pytorchtools import EarlyStopping
+
+from lbfgsnew import LBFGSNew
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = 'cpu'
@@ -17,11 +20,9 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         self.network = torch.nn.Sequential(
             nn.Linear(sequence_dim, hidden_in),
-            nn.Dropout(0.5),
-            nn.Tanh(),
+            nn.ELU(),
             nn.Linear(hidden_in, hidden_out),
-            nn.Dropout(0.5),
-            nn.Tanh(),
+            nn.ELU(),
             nn.Linear(hidden_out, label_dim),
             nn.Sigmoid()
         )
@@ -39,21 +40,43 @@ class MLPRegress(object):
     
     def fit(self, train_data, train_target):
         criterion = nn.MSELoss()
-        # optimizer = optim.LBFGS(self.model.parameters(), max_iter=1500, tolerance_grad=1e-5)
-        optimizer = optim.LBFGS(self.model.parameters())
+        epoch = 1000
+        # optimizer = LBFGSNew(self.model.parameters(), line_search_fn=True, batch_mode=False, tolerance_grad=2e-4, tolerance_change=1e-10)
+        optimizer = optim.LBFGS(self.model.parameters(), lr=1e-0, max_iter=1500, tolerance_grad=2e-4, tolerance_change=1e-10)
+        # optimizer = optim.Adam(self.model.parameters(), lr=1e-2)
+        # optimizer = optim.RMSprop(self.model.parameters())
         train_target = train_target.reshape(-1, 1).to(torch.float)
         train_target = train_target.to(device)
+
+        early_stopping = EarlyStopping(patience=100, verbose=False)
         def closure():
-            optimizer.zero_grad()
-            predict = self.model(train_data)
-            loss = criterion(predict, train_target) + 5e-3 * sum([(p**2).sum() for p in self.model.parameters()]) / sum([len(p) for p in self.model.parameters()])
-            loss.backward()
-            return loss
+            for i in range(epoch):
+                if torch.is_grad_enabled():
+                    optimizer.zero_grad()
+                predict = self.model(train_data)
+                loss = criterion(predict, train_target) #+ 1e-2 * sum([(p.abs()).sum() for p in self.model.parameters()]) / sum([len(p) for p in self.model.parameters()])
+                if loss.requires_grad:
+                    loss.backward()
+                early_stopping(loss, self.model)
+                # if early_stopping.early_stop:
+                #     return torch.tensor([0])
+                return loss
         optimizer.step(closure)
+        # for i in range(epoch):
+        #     optimizer.zero_grad()
+        #     predict = self.model(train_data)
+        #     loss = criterion(predict, train_target) + 3e-2 * sum([(p.abs()).sum() for p in self.model.parameters()]) / sum([len(p) for p in self.model.parameters()])
+        #     loss.backward()
+        #     optimizer.step()
+        #     early_stopping(loss, self.model)
+        #     if early_stopping.early_stop:
+        #         print("Early stopping")
+        #         break
     def predict(self, valid_data):
-        self.model.eval()
+        # self.model.eval()
         with torch.no_grad():
-            return self.model(valid_data)
+            self.model.load_state_dict(torch.load('checkpoint.pt'))
+            return [self.model(valid_data).item()]
 
 if __name__ == '__main__':
     model1 = MLPRegress(20, 30, 20, 1)

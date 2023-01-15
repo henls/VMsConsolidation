@@ -1,3 +1,5 @@
+from sklearnex import patch_sklearn, unpatch_sklearn
+patch_sklearn()
 import math
 from transformer import get_batch, get_data
 from glob import glob
@@ -10,6 +12,7 @@ import numpy as np
 import signal
 import socket
 from TorchMLP import MLPRegress
+# from scikitlearn_plus.neural_network import MLPRegressor_cuda
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -70,10 +73,11 @@ class MLP(object):
         for filename in dirnames:
             # if 'adam_ee_ntu_edu_tw_uw_oneswarm' not in filename:
             #     continue
-            if 'planetlab6_goto_info_waseda_ac_jp_uw_oneswarm' not in filename:
-                continue
+            # if 'planetlab6_goto_info_waseda_ac_jp_uw_oneswarm' not in filename:
+            #     continue
             train_data, val_data = get_data(filename)
-            model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+            model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30, 20), random_state=1)
+            # model = MLPRegressor_cuda(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
             # if os.path.exists('predictor/graph/{}.png'.format(filename.split('/')[-1])):
             #     print(filename)
             #     continue
@@ -82,6 +86,8 @@ class MLP(object):
             train_data_x, train_target_y = get_batch(train_data, 0, 1484)
             train_data_x = train_data_x.squeeze().transpose(1, 0)
             train_target_y = train_target_y.squeeze().transpose(1, 0)[:, -1]
+            train_data_x = train_data_x.numpy()
+            train_target_y = train_target_y.numpy()
             model.fit(train_data_x, train_target_y)
 
             val_loss = self.plot_and_loss(model.predict, val_data, filename)
@@ -126,12 +132,17 @@ class MLP(object):
         train_data = np.lib.stride_tricks.sliding_window_view(data, (1, slide_length))
         train_data = np.vstack(np.squeeze(train_data))
         train_targets = np.hstack(data[:,slide_length:])
-        return train_data[:-1], train_targets, data[:, -20:]
+        return torch.from_numpy(train_data[:-1]), torch.from_numpy(train_targets), torch.from_numpy(data[:, -20:])
 
     def recv(self):
         self.clientsocket,addr = self.serversocket.accept()
-        rec = self.clientsocket.recv(1024)
-        return rec.decode("utf-8")
+        data = ''
+        while 1:
+            rec = self.clientsocket.recv(1024)
+            data += rec.decode("utf-8")
+            if 'END' in data:
+                break
+        return data
 
     def send(self, data):
         self.clientsocket.send(str(data).encode("utf-8"))
@@ -139,14 +150,18 @@ class MLP(object):
     def predict(self):
         print('Launch model')
         while 1:
-            [previousDataList, currentDataList, currentData] = self.recv().split('$')
+            recvData = self.recv()
+            [previousDataList, currentDataList, currentData, _] = recvData.split('$')
             AllData = self.str2array(previousDataList, currentDataList, currentData)
             model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+            # model = MLPRegress(20, 30, 20, 1)
             train_data_x, train_target_y, valid_x = self.getTrainData(AllData)
             model.fit(train_data_x, train_target_y)
             result = model.predict(valid_x)
-            result = result if result >= 0 else [0.0]
-            print(result)
+            if result < [0]:
+                result = [0.0]
+            elif result > [1]:
+                result = [1.0]
             self.send(result)
 
     def str2array(self, previousDataList, currentDataList, currentData):
@@ -162,6 +177,6 @@ class MLP(object):
 if __name__ == '__main__':
     model = MLP()
     # model.predict()
-    # model.testLaunch()
-    model.testTorchMLP()
+    model.testLaunch()
+    # model.testTorchMLP()
         

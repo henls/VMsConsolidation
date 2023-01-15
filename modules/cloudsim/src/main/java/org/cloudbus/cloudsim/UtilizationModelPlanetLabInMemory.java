@@ -125,6 +125,7 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		// python transformerPredict.py model="CloudletName", data = data
 		// if time % n == 0
 		// update model (update cache = cached data)
+		time += 51000.0;
 		double currentUtil;
 		if (time % getSchedulingInterval() == 0) {
 			currentUtil = data[(int) time / (int) getSchedulingInterval()];
@@ -154,10 +155,9 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 				Socket socket = new Socket("127.0.0.1",12345);
 				PrintStream out = new PrintStream(socket.getOutputStream());
 				DecimalFormat decimalFormat = new DecimalFormat("0.000");
-				System.out.println(currentUtil);
 				out.print(Arrays.toString(previousData) + "$" + 
 					Arrays.toString(Arrays.copyOfRange(data, 0, (int) time / (int) getSchedulingInterval() - 1)) + "$" + 
-					decimalFormat.format(currentUtil)
+					decimalFormat.format(currentUtil) + "$END"
 				);
 				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(),"utf-8"));
 				char[] rDataLen = new char[100];
