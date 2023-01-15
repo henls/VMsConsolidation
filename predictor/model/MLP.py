@@ -1,5 +1,5 @@
-from sklearnex import patch_sklearn, unpatch_sklearn
-patch_sklearn()
+# from sklearnex import patch_sklearn, unpatch_sklearn
+# patch_sklearn()
 import math
 from transformer import get_batch, get_data
 from glob import glob
@@ -12,6 +12,7 @@ import numpy as np
 import signal
 import socket
 from TorchMLP import MLPRegress
+import joblib
 # from scikitlearn_plus.neural_network import MLPRegressor_cuda
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -73,8 +74,8 @@ class MLP(object):
         for filename in dirnames:
             # if 'adam_ee_ntu_edu_tw_uw_oneswarm' not in filename:
             #     continue
-            # if 'planetlab6_goto_info_waseda_ac_jp_uw_oneswarm' not in filename:
-            #     continue
+            if 'planetlab6_goto_info_waseda_ac_jp_uw_oneswarm' not in filename:
+                continue
             train_data, val_data = get_data(filename)
             model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30, 20), random_state=1)
             # model = MLPRegressor_cuda(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
@@ -151,12 +152,17 @@ class MLP(object):
         print('Launch model')
         while 1:
             recvData = self.recv()
-            [previousDataList, currentDataList, currentData, _] = recvData.split('$')
+            [previousDataList, currentDataList, currentData, timeStamp, cloudletName, _] = recvData.split('$')
             AllData = self.str2array(previousDataList, currentDataList, currentData)
-            model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
-            # model = MLPRegress(20, 30, 20, 1)
             train_data_x, train_target_y, valid_x = self.getTrainData(AllData)
-            model.fit(train_data_x, train_target_y)
+            train_interval = 10 * 300
+            if int(timeStamp) % train_interval == 0:
+                model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+                model.fit(train_data_x, train_target_y)
+                joblib.dump(model, "predictor/modelSaved/{}.m".format(cloudletName))
+            else:
+                model = joblib.load("predictor/modelSaved/{}.m".format(cloudletName))
+            # model = MLPRegress(20, 30, 20, 1)
             result = model.predict(valid_x)
             if result < [0]:
                 result = [0.0]
@@ -176,7 +182,7 @@ class MLP(object):
 
 if __name__ == '__main__':
     model = MLP()
-    # model.predict()
-    model.testLaunch()
+    model.predict()
+    # model.testLaunch()
     # model.testTorchMLP()
         

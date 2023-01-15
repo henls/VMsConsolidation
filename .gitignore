@@ -1,7 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Ansible template
 *.retry
-
+*/modelSaved/*
 ### macOS template
 # General
 .DS_Store
