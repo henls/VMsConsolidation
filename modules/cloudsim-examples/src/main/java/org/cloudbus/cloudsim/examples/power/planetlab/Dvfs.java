@@ -39,6 +39,7 @@ public class Dvfs {
 		String vmAllocationPolicy = "dvfs"; // DVFS policy without VM migrations
 		String vmSelectionPolicy = "";
 		String parameter = "";
+		long stime = System.currentTimeMillis();
 
 		new PlanetLabRunner(
 				enableOutput,
@@ -49,6 +50,8 @@ public class Dvfs {
 				vmAllocationPolicy,
 				vmSelectionPolicy,
 				parameter);
+		long etime = System.currentTimeMillis();
+		System.out.printf("执行时长：%d 秒.", (etime - stime) / 1000);
 	}
 
 }
