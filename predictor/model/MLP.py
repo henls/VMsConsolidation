@@ -125,7 +125,7 @@ class MLP(object):
             print('-' * 89)
 
     def getTrainData(self, data):
-        data = np.sort(np.lib.stride_tricks.sliding_window_view(data, (10,)), axis=1)[:, int(10 * 0.75) - 1]
+        data = np.sort(np.lib.stride_tricks.sliding_window_view(data, (10,)), axis=1)[:, int(10 * 1) - 1]
         train_data1, train_targets1, valid_x = self.split_data(data.reshape(1, -1), 20)
         return train_data1, train_targets1, valid_x
 

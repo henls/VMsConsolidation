@@ -38,6 +38,7 @@ public class predIqrMc {
 		String vmAllocationPolicy = "predIQR"; // Inter Quartile Range (IQR) VM allocation policy
 		String vmSelectionPolicy = "mc"; // Maximum Correlation (MC) VM selection policy
 		String parameter = "0.7"; // the safety parameter of the IQR policy
+		long stime = System.currentTimeMillis();
 
 		new PlanetLabRunner(
 				enableOutput,
@@ -48,6 +49,8 @@ public class predIqrMc {
 				vmAllocationPolicy,
 				vmSelectionPolicy,
 				parameter);
+		long etime = System.currentTimeMillis();
+		System.out.printf("执行时长：%d 秒.", (etime - stime) / 1000);
 	}
 
 }
