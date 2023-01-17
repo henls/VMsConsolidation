@@ -4,7 +4,7 @@ import java.io.IOException;
 
 /**
  * A simulation of a heterogeneous power aware data center that applies the Inter Quartile Range
- * (IQR) VM allocation policy and Maximum Correlation (MC) VM selection policy.
+ * (IQR) VM allocation policy and Random Selection (RS) VM selection policy.
  * 
  * This example uses a real PlanetLab workload: 20110303.
  * 
@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author Anton Beloglazov
  * @since Jan 5, 2012
  */
-public class predIqrMc {
+public class predIqrRs {
 
 	/**
 	 * The main method.
@@ -32,12 +32,12 @@ public class predIqrMc {
 	public static void main(String[] args) throws IOException {
 		boolean enableOutput = true;
 		boolean outputToFile = false;
-		String inputFolder = IqrMc.class.getClassLoader().getResource("workload/planetlab").getPath();
+		String inputFolder = IqrRs.class.getClassLoader().getResource("workload/planetlab").getPath();
 		String outputFolder = "output";
 		String workload = "20110303"; // PlanetLab workload
 		String vmAllocationPolicy = "predIQR"; // Inter Quartile Range (IQR) VM allocation policy
-		String vmSelectionPolicy = "mc"; // Maximum Correlation (MC) VM selection policy
-		String parameter = "0.7"; // the safety parameter of the IQR policy
+		String vmSelectionPolicy = "rs"; // Random Selection (RS) VM selection policy
+		String parameter = "1.5"; // the safety parameter of the IQR policy
 
 		new PlanetLabRunner(
 				enableOutput,

@@ -69,11 +69,10 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		// Load previous data
 		try {
 			previousData = LoadPreviousData(cloudletName);
-		for (double d : previousData) {
-			System.out.println(d);
-		}
+			// previousData = new double [0];
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(0);
 		}
 		
 	}
@@ -179,18 +178,20 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		double day = Double.parseDouble(directPath.getParent().getFileName().toString());
 		List<Path> pickFiles = new ArrayList<>();
 		List<Double> dataList = new ArrayList<>();
+		DecimalFormat decimalFormat = new DecimalFormat("####0");
 		for (double item : filenames) {
 			if (item < day){
-				pickFiles.add(Paths.get(directPath.getParent().toString(), "" + item));
+				pickFiles.add(Paths.get(directPath.getParent().getParent().toString(), "" + decimalFormat.format(item)));
 			}
 		}
 		for (Path path : pickFiles) {
-			File folder = new File(path.toAbsolutePath().toString());
+			String absolutePath = path.toAbsolutePath().toString();
+			File folder = new File(absolutePath);
 			String[] fileNameList = folder.list();
 			String indata;
 			for (String files : fileNameList) {
 				if (files.contains(cloudletName)){
-					BufferedReader input = new BufferedReader(new FileReader(files));
+					BufferedReader input = new BufferedReader(new FileReader(absolutePath + "/" + files));
 					try {
 						indata = input.readLine();
 						while(indata != null){
@@ -200,6 +201,7 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 						input.close();
 					} catch (IOException e) {
 						e.printStackTrace();
+						System.exit(0);
 					}
 				}
 			}

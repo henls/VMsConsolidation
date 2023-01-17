@@ -161,7 +161,12 @@ class MLP(object):
                 model.fit(train_data_x, train_target_y)
                 joblib.dump(model, "predictor/modelSaved/{}.m".format(cloudletName))
             else:
-                model = joblib.load("predictor/modelSaved/{}.m".format(cloudletName))
+                try:
+                    model = joblib.load("predictor/modelSaved/{}.m".format(cloudletName))
+                except FileNotFoundError:
+                    model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+                    model.fit(train_data_x, train_target_y)
+                    joblib.dump(model, "predictor/modelSaved/{}.m".format(cloudletName))
             # model = MLPRegress(20, 30, 20, 1)
             result = model.predict(valid_x)
             if result < [0]:
