@@ -323,7 +323,6 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 			if (allocatedHost != null) {
 				allocatedHost.vmCreate(vm);
 				Log.printConcatLine("VM #", vm.getId(), " allocated to host #", allocatedHost.getId());
-
 				Map<String, Object> migrate = new HashMap<>();
 				migrate.put("vm", vm);
 				migrate.put("host", allocatedHost);
@@ -350,7 +349,6 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 			if (allocatedHost != null) {
 				allocatedHost.vmCreate(vm);
 				Log.printConcatLine("VM #", vm.getId(), " allocated to host #", allocatedHost.getId());
-
 				Map<String, Object> migrate = new HashMap<>();
 				migrate.put("vm", vm);
 				migrate.put("host", allocatedHost);

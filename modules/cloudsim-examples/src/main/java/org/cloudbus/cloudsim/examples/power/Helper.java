@@ -258,7 +258,7 @@ public class Helper {
 		double totalSimulationTime = lastClock;
 		double energy = datacenter.getPower() / (3600 * 1000);
 		int numberOfMigrations = datacenter.getMigrationCount();
-
+		double AvgMigration = getAvgMigration(vms); // wxh
 		Map<String, Double> slaMetrics = getSlaMetrics(vms);
 
 		double slaOverall = slaMetrics.get("overall");
@@ -273,7 +273,8 @@ public class Helper {
 		double sla = slaTimePerActiveHost * slaDegradationDueToMigration;
 
 		List<Double> timeBeforeHostShutdown = getTimesBeforeHostShutdown(hosts);
-
+		// 统计主机状态切换次数
+		double AvgPowerStateChangeNum = getAvgPowerStateChangeNum(hosts);
 		int numberOfHostShutdowns = timeBeforeHostShutdown.size();
 
 		double meanTimeBeforeHostShutdown = Double.NaN;
@@ -323,6 +324,7 @@ public class Helper {
 			data.append(String.format("%.2f", totalSimulationTime)).append(delimeter);
 			data.append(String.format("%.5f", energy)).append(delimeter);
 			data.append(String.format("%d", numberOfMigrations)).append(delimeter);
+			data.append(String.format("%.2f", AvgMigration)).append(delimeter);
 			data.append(String.format("%.10f", sla)).append(delimeter);
 			data.append(String.format("%.10f", slaTimePerActiveHost)).append(delimeter);
 			data.append(String.format("%.10f", slaDegradationDueToMigration)).append(delimeter);
@@ -332,6 +334,7 @@ public class Helper {
 			// data.append(String.format("%.5f", slaTimePerVmWithoutMigration) + delimeter);
 			// data.append(String.format("%.5f", slaTimePerHost) + delimeter);
 			data.append(String.format("%d", numberOfHostShutdowns)).append(delimeter);
+			data.append(String.format("%.2f", AvgPowerStateChangeNum)).append(delimeter);
 			data.append(String.format("%.2f", meanTimeBeforeHostShutdown)).append(delimeter);
 			data.append(String.format("%.2f", stDevTimeBeforeHostShutdown)).append(delimeter);
 			data.append(String.format("%.2f", meanTimeBeforeVmMigration)).append(delimeter);
@@ -388,6 +391,7 @@ public class Helper {
 			Log.printLine(String.format("Total simulation time: %.2f sec", totalSimulationTime));
 			Log.printLine(String.format("Energy consumption: %.2f kWh", energy));
 			Log.printLine(String.format("Number of VM migrations: %d", numberOfMigrations));
+			Log.printLine(String.format("Average migrations per VM: %f", AvgMigration));
 			Log.printLine(String.format("SLA: %.5f%%", sla * 100));
 			Log.printLine(String.format(
 					"SLA perf degradation due to migration: %.2f%%",
@@ -401,6 +405,7 @@ public class Helper {
 			// slaTimePerVmWithoutMigration * 100));
 			// Log.printLine(String.format("SLA time per host: %.2f%%", slaTimePerHost * 100));
 			Log.printLine(String.format("Number of host shutdowns: %d", numberOfHostShutdowns));
+			Log.printLine(String.format("Average Power state Changes: %f", AvgPowerStateChangeNum));
 			Log.printLine(String.format(
 					"Mean time before a host shutdown: %.2f sec",
 					meanTimeBeforeHostShutdown));
@@ -482,6 +487,31 @@ public class Helper {
 		}
 		scanner.close();
 		return csvName.toString();
+	}
+
+	public static double getAvgMigration(List<Vm> vms){
+		int sum = 0;
+		for (Vm vm : vms) {
+			sum += vm.getMigrationNumbers();
+		}
+		return sum / vms.size();
+	}
+
+	public static double getAvgPowerStateChangeNum(List<Host> hosts){
+		double PowerStateChangeNum = 0;
+		for (Host host : hosts) {
+			boolean previousIsActive = true;
+			for (HostStateHistoryEntry entry : ((HostDynamicWorkload) host).getStateHistory()) {
+				if (previousIsActive == true && entry.isActive() == false) {
+					PowerStateChangeNum += 1;
+				}
+				if (previousIsActive == false && entry.isActive() == true) {
+					PowerStateChangeNum += 1;
+				}
+				previousIsActive = entry.isActive();
+			}
+		}
+		return PowerStateChangeNum / hosts.size();
 	}
 
 	/**

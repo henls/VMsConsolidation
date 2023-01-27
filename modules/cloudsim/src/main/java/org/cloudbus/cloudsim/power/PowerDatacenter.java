@@ -118,7 +118,10 @@ public class PowerDatacenter extends Datacenter {
 
 						targetHost.addMigratingInVm(vm);
 						incrementMigrationCount();
-
+						// wxh 统计每个虚拟机的迁移次数
+						int currentMigrationNumbers = vm.getMigrationNumbers();
+						vm.setMigrationNumbers(currentMigrationNumbers + 1);
+						// 
 						/** VM migration delay = RAM / bandwidth **/
 						// we use BW / 2 to model BW available for migration purposes, the other
 						// half of BW is for VM communication
