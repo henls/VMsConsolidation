@@ -20,6 +20,7 @@ import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationInterQuartile
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLocalRegression;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLocalRegressionRobust;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationMedianAbsoluteDeviation;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationMedianAbsoluteDeviationPrediction;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationStaticThreshold;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationThrPrediction;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicySimple;
@@ -281,6 +282,18 @@ public abstract class RunnerAbstract {
 						vmSelectionPolicy,
 						0.7);
 				vmAllocationPolicy = new PowerVmAllocationPolicyMigrationMedianAbsoluteDeviation(
+						hostList,
+						vmSelectionPolicy,
+						parameter,
+						fallbackVmSelectionPolicy);
+				break;
+			}
+			case "predMad": {
+				PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(
+						hostList,
+						vmSelectionPolicy,
+						0.7);
+				vmAllocationPolicy = new PowerVmAllocationPolicyMigrationMedianAbsoluteDeviationPrediction(
 						hostList,
 						vmSelectionPolicy,
 						parameter,

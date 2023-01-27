@@ -113,6 +113,8 @@ public class PowerVmAllocationPolicyMigrationInterQuartileRangePrediction extend
 			totalRequestedMips += vm.getNextRequestedTotalMips();
 		}
 		double utilization = totalRequestedMips / host.getTotalMips();
+		// System.out.println("upperThreshold " + upperThreshold + " iqr " + getHostUtilizationIqr(_host) + " pred " + utilization);
+		// return utilization > upperThreshold;
 		return utilization > upperThreshold;
 	}
 }

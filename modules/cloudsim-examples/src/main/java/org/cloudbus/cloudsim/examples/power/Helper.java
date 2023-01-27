@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import javax.swing.JOptionPane;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerDynamicWorkload;
@@ -254,7 +255,6 @@ public class Helper {
 
 		int numberOfHosts = hosts.size();
 		int numberOfVms = vms.size();
-
 		double totalSimulationTime = lastClock;
 		double energy = datacenter.getPower() / (3600 * 1000);
 		int numberOfMigrations = datacenter.getMigrationCount();

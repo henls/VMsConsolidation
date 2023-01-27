@@ -29,6 +29,7 @@ public abstract class PowerModelSpecPower implements PowerModel {
 	@Override
 	public double getPower(double utilization) throws IllegalArgumentException {
 		if (utilization < 0 || utilization > 1) {
+			System.out.println(utilization);
 			throw new IllegalArgumentException("Utilization value must be between 0 and 1");
 		}
 		if (utilization % 0.1 == 0) {

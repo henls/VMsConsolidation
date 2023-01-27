@@ -60,7 +60,10 @@ public class Vm {
 	
 	/** NEW Indicates if the VM is in Pause State (e.g. Stop & copy phase)*/
 	private boolean inPause;
-	
+
+	/** Indicates the Number of VM migration times. */
+	private int migrationNumbers;
+
 	/** The current allocated storage size. */
 	private long currentAllocatedSize;
 
@@ -554,6 +557,24 @@ public class Vm {
 	 */
 	public void setCurrentAllocatedRam(int currentAllocatedRam) {
 		this.currentAllocatedRam = currentAllocatedRam;
+	}
+
+	/**
+	 * Gets the current migrations. wxh
+	 * 
+	 * @return the current migration numbers
+	 */
+	public int getMigrationNumbers(){
+		return migrationNumbers;
+	}
+
+	/**
+	 * set the current migrations. wxh
+	 * 
+	 * @param currentMigrationNumbers the new current migration numbers
+	 */
+	public void setMigrationNumbers(int currentMigrationNumbers){
+		this.migrationNumbers = currentMigrationNumbers;
 	}
 
 	/**

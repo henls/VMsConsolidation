@@ -125,7 +125,7 @@ class MLP(object):
             print('-' * 89)
 
     def getTrainData(self, data):
-        data = np.sort(np.lib.stride_tricks.sliding_window_view(data, (10,)), axis=1)[:, int(10 * 1) - 1]
+        data = np.sort(np.lib.stride_tricks.sliding_window_view(data, (10,)), axis=1)[:, int(10 * 0.8) - 1]
         train_data1, train_targets1, valid_x = self.split_data(data.reshape(1, -1), 20)
         return train_data1, train_targets1, valid_x
 
@@ -159,15 +159,17 @@ class MLP(object):
             if int(timeStamp) % train_interval == 0:
                 model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
                 model.fit(train_data_x, train_target_y)
-                joblib.dump(model, "predictor/modelSaved/{}.m".format(cloudletName))
+                joblib.dump(model, "/home/wangxinhua/{}.m".format(cloudletName))
             else:
                 try:
-                    model = joblib.load("predictor/modelSaved/{}.m".format(cloudletName))
+                    model = joblib.load("/home/wangxinhua/{}.m".format(cloudletName))
                 except FileNotFoundError:
                     model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
                     model.fit(train_data_x, train_target_y)
-                    joblib.dump(model, "predictor/modelSaved/{}.m".format(cloudletName))
+                    joblib.dump(model, "/home/wangxinhua/{}.m".format(cloudletName))
             # model = MLPRegress(20, 30, 20, 1)
+            # if 'planetlab1_unineuchatel_ch_princeton_codeen' == cloudletName:
+            #     print(valid_x)
             result = model.predict(valid_x)
             if result < [0]:
                 result = [0.0]

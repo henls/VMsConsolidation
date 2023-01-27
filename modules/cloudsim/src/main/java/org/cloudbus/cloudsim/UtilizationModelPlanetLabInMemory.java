@@ -68,8 +68,9 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		input.close();
 		// Load previous data
 		try {
-			previousData = LoadPreviousData(cloudletName);
-			// previousData = new double [0];
+			// previousData = LoadPreviousData(cloudletName);
+			// System.out.println("Load previous data");
+			previousData = new double [0];
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);

@@ -99,6 +99,7 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 	@Override
 	protected boolean isHostOverUtilized(PowerHost host) {
 		PowerHostUtilizationHistory _host = (PowerHostUtilizationHistory) host;
+		double previousUtil = _host.getPreviousUtilizationMips();
 		double upperThreshold = 0;
 		try {
 			upperThreshold = 1 - getSafetyParameter() * getHostUtilizationIqr(_host);
@@ -113,6 +114,7 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 			totalRequestedMips += vm.getNextRequestedTotalMips();
 		}
 		double utilization = totalRequestedMips / host.getTotalMips();
-		return utilization > 0.8;
+		// System.out.println("previous Util : " + previousUtil / host.getTotalMips());
+		return utilization > 1;
 	}
 }

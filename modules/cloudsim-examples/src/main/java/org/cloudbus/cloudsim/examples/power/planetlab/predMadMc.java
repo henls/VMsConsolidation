@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author Anton Beloglazov
  * @since Jan 5, 2012
  */
-public class predIqrMc {
+public class predMadMc {
 
 	/**
 	 * The main method.
@@ -35,9 +35,9 @@ public class predIqrMc {
 		String inputFolder = IqrMc.class.getClassLoader().getResource("workload/planetlab").getPath();
 		String outputFolder = "output";
 		String workload = "20110303"; // PlanetLab workload
-		String vmAllocationPolicy = "predIQR"; // Inter Quartile Range (IQR) VM allocation policy
+		String vmAllocationPolicy = "predMad"; // Inter Quartile Range (IQR) VM allocation policy
 		String vmSelectionPolicy = "mc"; // Maximum Correlation (MC) VM selection policy
-		String parameter = "0.3"; // the safety parameter of the IQR policy
+		String parameter = "1.5"; // the safety parameter of the IQR policy
 		long stime = System.currentTimeMillis();
 
 		new PlanetLabRunner(
