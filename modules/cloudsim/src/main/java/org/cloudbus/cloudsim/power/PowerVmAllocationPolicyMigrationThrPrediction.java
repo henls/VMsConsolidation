@@ -108,8 +108,10 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 		}
 		addHistoryEntry(host, upperThreshold);
 		double totalRequestedMips = 0;
+		double totalCurrentMips = 0;
 		for (Vm vm : host.getVmList()) {
 			// totalRequestedMips += vm.getCurrentRequestedTotalMips();
+			totalCurrentMips += vm.getCurrentRequestedTotalMips();
 			// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
 			totalRequestedMips += vm.getNextRequestedTotalMips();
 		}

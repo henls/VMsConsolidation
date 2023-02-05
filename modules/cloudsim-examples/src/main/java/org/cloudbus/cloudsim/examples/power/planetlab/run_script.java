@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author Anton Beloglazov
  * @since Jan 5, 2012
  */
-public class predThrFFTmc {
+public class run_script {
 
 	/**
 	 * The main method.
@@ -31,14 +31,18 @@ public class predThrFFTmc {
 	 */
 	public static void main(String[] args) throws IOException {
 		boolean enableOutput = true;
-		boolean outputToFile = false;
+		// boolean outputToFile = false;
+		boolean outputToFile = true;
 		String inputFolder = IqrMc.class.getClassLoader().getResource("workload/planetlab").getPath();
 		String outputFolder = "output";
-		String workload = "20110303"; // PlanetLab workload
-		String vmAllocationPolicy = "predThr"; // Inter Quartile Range (IQR) VM allocation policy
-		String vmSelectionPolicy = "fftmc"; // Maximum Correlation (MC) VM selection policy
-		String parameter = "1"; // the safety parameter of the IQR policy
-
+		// String workload = "20110303"; // PlanetLab workload
+		String workload = args[0];
+		// String vmAllocationPolicy = "predThr"; // Inter Quartile Range (IQR) VM allocation policy
+		// String vmSelectionPolicy = "mc"; // Maximum Correlation (MC) VM selection policy
+		String vmAllocationPolicy = args[1];
+		String vmSelectionPolicy = args[2];
+		// String parameter = "1"; // the safety parameter of the IQR policy
+		String parameter = args[3];
 		new PlanetLabRunner(
 				enableOutput,
 				outputToFile,

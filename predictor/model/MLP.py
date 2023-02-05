@@ -5,6 +5,7 @@ from transformer import get_batch, get_data
 from glob import glob
 import time
 from sklearn.neural_network import MLPRegressor
+from sklearn.linear_model import LinearRegression
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch
@@ -125,7 +126,8 @@ class MLP(object):
             print('-' * 89)
 
     def getTrainData(self, data):
-        data = np.sort(np.lib.stride_tricks.sliding_window_view(data, (10,)), axis=1)[:, int(10 * 0.8) - 1]
+        quantile_windows = 20
+        data = np.sort(np.lib.stride_tricks.sliding_window_view(data, (quantile_windows,)), axis=1)[:, int(quantile_windows * 0.6) - 1]
         train_data1, train_targets1, valid_x = self.split_data(data.reshape(1, -1), 20)
         return train_data1, train_targets1, valid_x
 
@@ -133,7 +135,7 @@ class MLP(object):
         train_data = np.lib.stride_tricks.sliding_window_view(data, (1, slide_length))
         train_data = np.vstack(np.squeeze(train_data))
         train_targets = np.hstack(data[:,slide_length:])
-        return torch.from_numpy(train_data[:-1]), torch.from_numpy(train_targets), torch.from_numpy(data[:, -20:])
+        return torch.from_numpy(train_data[:-1]), torch.from_numpy(train_targets), torch.from_numpy(data[:, -1 * slide_length:])
 
     def recv(self):
         self.clientsocket,addr = self.serversocket.accept()
@@ -158,6 +160,7 @@ class MLP(object):
             train_interval = 10 * 300
             if int(timeStamp) % train_interval == 0:
                 model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+                # model = LinearRegression()
                 model.fit(train_data_x, train_target_y)
                 joblib.dump(model, "/home/wangxinhua/{}.m".format(cloudletName))
             else:
@@ -165,6 +168,7 @@ class MLP(object):
                     model = joblib.load("/home/wangxinhua/{}.m".format(cloudletName))
                 except FileNotFoundError:
                     model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(30,20), random_state=1)
+                    # model = LinearRegression()
                     model.fit(train_data_x, train_target_y)
                     joblib.dump(model, "/home/wangxinhua/{}.m".format(cloudletName))
             # model = MLPRegress(20, 30, 20, 1)

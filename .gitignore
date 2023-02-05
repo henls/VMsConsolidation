@@ -2,6 +2,7 @@
 ### Ansible template
 *.retry
 */modelSaved/*
+*.txt
 ### macOS template
 # General
 .DS_Store

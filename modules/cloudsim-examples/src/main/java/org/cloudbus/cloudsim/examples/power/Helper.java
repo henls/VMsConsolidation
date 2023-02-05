@@ -274,6 +274,7 @@ public class Helper {
 
 		List<Double> timeBeforeHostShutdown = getTimesBeforeHostShutdown(hosts);
 		// 统计主机状态切换次数
+		Map <Integer, Integer> ActivateServers = getActivateServers(hosts);
 		double AvgPowerStateChangeNum = getAvgPowerStateChangeNum(hosts);
 		int numberOfHostShutdowns = timeBeforeHostShutdown.size();
 
@@ -333,6 +334,7 @@ public class Helper {
 			// data.append(String.format("%.5f", slaTimePerVmWithMigration) + delimeter);
 			// data.append(String.format("%.5f", slaTimePerVmWithoutMigration) + delimeter);
 			// data.append(String.format("%.5f", slaTimePerHost) + delimeter);
+			data.append(String.format("%s", ActivateServers)).append(delimeter);
 			data.append(String.format("%d", numberOfHostShutdowns)).append(delimeter);
 			data.append(String.format("%.2f", AvgPowerStateChangeNum)).append(delimeter);
 			data.append(String.format("%.2f", meanTimeBeforeHostShutdown)).append(delimeter);
@@ -404,6 +406,7 @@ public class Helper {
 			// Log.printLine(String.format("SLA time per VM without migration: %.2f%%",
 			// slaTimePerVmWithoutMigration * 100));
 			// Log.printLine(String.format("SLA time per host: %.2f%%", slaTimePerHost * 100));
+			Log.printLine(String.format("Number of active servers: %s", ActivateServers));
 			Log.printLine(String.format("Number of host shutdowns: %d", numberOfHostShutdowns));
 			Log.printLine(String.format("Average Power state Changes: %f", AvgPowerStateChangeNum));
 			Log.printLine(String.format(
@@ -512,6 +515,27 @@ public class Helper {
 			}
 		}
 		return PowerStateChangeNum / hosts.size();
+	}
+
+	public static Map <Integer, Integer> getActivateServers(List<Host> hosts){
+		Map <Integer, Integer> dictMap = new HashMap<>();
+		int interval = 1 * 60 * 60;
+		for (Host host : hosts) {
+			for (HostStateHistoryEntry entry : ((HostDynamicWorkload) host).getStateHistory()) {
+				int NumActive = 1;
+				if ((int) entry.getTime() % interval == 0){
+					if (entry.isActive()){
+						if (dictMap.containsKey((int) (entry.getTime() / interval))){
+							NumActive = dictMap.get((int) (entry.getTime() / interval)) + 1;
+						}else{
+							NumActive = 1;
+						}
+						dictMap.put((int) (entry.getTime() / interval), NumActive);
+					}
+				}
+			}
+		}
+		return dictMap;
 	}
 
 	/**

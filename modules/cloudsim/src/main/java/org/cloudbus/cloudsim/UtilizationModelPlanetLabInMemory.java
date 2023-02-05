@@ -141,7 +141,7 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		String ans = "";
 		double predictedUtilization = 0.;
 		try {
-			if (previousData.length + (int) time / (int) getSchedulingInterval() < 30){
+			if (previousData.length + (int) time / (int) getSchedulingInterval() < 41){
 				int length = 10;
 				double[] utilizationHistoryReversed = new double[length];
 				for (int i = 0; i < length; i++) {
