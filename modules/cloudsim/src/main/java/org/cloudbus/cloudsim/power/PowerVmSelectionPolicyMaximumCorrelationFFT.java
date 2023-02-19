@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.checkerframework.checker.units.qual.min;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.util.MathUtil;
 import org.cloudbus.cloudsim.FFTwxh2.*;
@@ -142,7 +143,7 @@ public class PowerVmSelectionPolicyMaximumCorrelationFFT extends PowerVmSelectio
 		for (int i = 0; i < n; i++){
 			for (int j = 0; j < n; j++) {
 				if (j != i) {
-					x[i][j] = FFTcorrelate.correlate(stdDataList(data[i]), stdDataList(data[j]))[0];
+					x[i][j] = FFTcorrelate.correlate(data[i], data[j])[0];
 				}else{
 					x[i][j] = 0;
 				}
@@ -178,59 +179,88 @@ public class PowerVmSelectionPolicyMaximumCorrelationFFT extends PowerVmSelectio
 		return outputList;
 	}
 
-	// protected int getMigrateVmId(double[][] data){
-	// 	/*迁移干扰最大的vm */
-	// 	int[] maxId = {0, 0};
-	// 	double max = 0;
-	// 	int n = data.length;
-	// 	for (int i = 0; i < n; i++) {
-	// 		for (int j = 0; j < n; j++) {
-	// 			if (max < data[i][j]){
-	// 				maxId[0] = i;
-	// 				maxId[1] = j;
-	// 				max = data[i][j];
-	// 			}
-	// 		}
-	// 	}
-	// 	data[maxId[0]][maxId[1]] = 0;
-	// 	data[maxId[1]][maxId[0]] = 0;
-	// 	double max_a = 0;
-	// 	for (int i = 0; i < n; i++){
-	// 		if (max_a < data[maxId[0]][i]){
-	// 			max_a = data[maxId[0]][i];
-	// 		}
-	// 	}
-	// 	double max_b = 0;
-	// 	for (int i = 0; i < n; i++){
-	// 		if (max_b < data[maxId[1]][i]){
-	// 			max_b = data[maxId[1]][i];
-	// 		}
-	// 	}
-	// 	int ret = 0;
-	// 	if (max_a > max_b){
-	// 		ret = maxId[0];
-	// 	}else{
-	// 		ret = maxId[1];
-	// 	}
-	// 	return ret;
-	// }
+	public static double[] noramlDataList(double[] inputList) {
+		// 判断是否为空
+		if (inputList == null || inputList.length == 0) {
+			return null;
+		}
+		// 计算最大值和最小值
+		double max = 0.0;
+		for (double item : inputList) {
+			if (item > max){
+				max = item;
+			}
+		}
+	
+		double min = 1000.;
+		for (double item : inputList) {
+			if (item < min){
+				min = item;
+			}
+		}
+
+		// 计算转换后的值
+		double[] outputList = new double[inputList.length];
+		for (int i = 0; i < inputList.length; i++){
+			outputList[i] = (inputList[i] - min) / (max - min);
+		}
+		
+		return outputList;
+	}
 
 	protected int getMigrateVmId(double[][] data){
-		/*第二种判断迁移VM的算法，累加相关值，选最大的那个 */
-		int maxId = 0;
+		/*迁移干扰最大的vm */
+		int[] maxId = {0, 0};
 		double max = 0;
 		int n = data.length;
 		for (int i = 0; i < n; i++) {
-			double Temp = 0.;
 			for (int j = 0; j < n; j++) {
-				Temp += data[i][j];
-			}
-			if (Temp > max){
-				maxId = i;
+				if (max < data[i][j]){
+					maxId[0] = i;
+					maxId[1] = j;
+					max = data[i][j];
+				}
 			}
 		}
-		return maxId;
+		data[maxId[0]][maxId[1]] = 0;
+		data[maxId[1]][maxId[0]] = 0;
+		double max_a = 0;
+		for (int i = 0; i < n; i++){
+			if (max_a < data[maxId[0]][i]){
+				max_a = data[maxId[0]][i];
+			}
+		}
+		double max_b = 0;
+		for (int i = 0; i < n; i++){
+			if (max_b < data[maxId[1]][i]){
+				max_b = data[maxId[1]][i];
+			}
+		}
+		int ret = 0;
+		if (max_a > max_b){
+			ret = maxId[0];
+		}else{
+			ret = maxId[1];
+		}
+		return ret;
 	}
+
+	// protected int getMigrateVmId(double[][] data){
+	// 	/*第二种判断迁移VM的算法，累加相关值，选最大的那个 */
+	// 	int maxId = 0;
+	// 	double max = 0;
+	// 	int n = data.length;
+	// 	for (int i = 0; i < n; i++) {
+	// 		double Temp = 0.;
+	// 		for (int j = 0; j < n; j++) {
+	// 			Temp += data[i][j];
+	// 		}
+	// 		if (Temp > max){
+	// 			maxId = i;
+	// 		}
+	// 	}
+	// 	return maxId;
+	// }
 
 	/**
 	 * Gets the fallback policy.
