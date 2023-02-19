@@ -178,41 +178,58 @@ public class PowerVmSelectionPolicyMaximumCorrelationFFT extends PowerVmSelectio
 		return outputList;
 	}
 
+	// protected int getMigrateVmId(double[][] data){
+	// 	/*迁移干扰最大的vm */
+	// 	int[] maxId = {0, 0};
+	// 	double max = 0;
+	// 	int n = data.length;
+	// 	for (int i = 0; i < n; i++) {
+	// 		for (int j = 0; j < n; j++) {
+	// 			if (max < data[i][j]){
+	// 				maxId[0] = i;
+	// 				maxId[1] = j;
+	// 				max = data[i][j];
+	// 			}
+	// 		}
+	// 	}
+	// 	data[maxId[0]][maxId[1]] = 0;
+	// 	data[maxId[1]][maxId[0]] = 0;
+	// 	double max_a = 0;
+	// 	for (int i = 0; i < n; i++){
+	// 		if (max_a < data[maxId[0]][i]){
+	// 			max_a = data[maxId[0]][i];
+	// 		}
+	// 	}
+	// 	double max_b = 0;
+	// 	for (int i = 0; i < n; i++){
+	// 		if (max_b < data[maxId[1]][i]){
+	// 			max_b = data[maxId[1]][i];
+	// 		}
+	// 	}
+	// 	int ret = 0;
+	// 	if (max_a > max_b){
+	// 		ret = maxId[0];
+	// 	}else{
+	// 		ret = maxId[1];
+	// 	}
+	// 	return ret;
+	// }
+
 	protected int getMigrateVmId(double[][] data){
-		/*迁移干扰最大的vm */
-		int[] maxId = {0, 0};
+		/*第二种判断迁移VM的算法，累加相关值，选最大的那个 */
+		int maxId = 0;
 		double max = 0;
 		int n = data.length;
 		for (int i = 0; i < n; i++) {
+			double Temp = 0.;
 			for (int j = 0; j < n; j++) {
-				if (max < data[i][j]){
-					maxId[0] = i;
-					maxId[1] = j;
-					max = data[i][j];
-				}
+				Temp += data[i][j];
+			}
+			if (Temp > max){
+				maxId = i;
 			}
 		}
-		data[maxId[0]][maxId[1]] = 0;
-		data[maxId[1]][maxId[0]] = 0;
-		double max_a = 0;
-		for (int i = 0; i < n; i++){
-			if (max_a < data[maxId[0]][i]){
-				max_a = data[maxId[0]][i];
-			}
-		}
-		double max_b = 0;
-		for (int i = 0; i < n; i++){
-			if (max_b < data[maxId[1]][i]){
-				max_b = data[maxId[1]][i];
-			}
-		}
-		int ret = 0;
-		if (max_a > max_b){
-			ret = maxId[0];
-		}else{
-			ret = maxId[1];
-		}
-		return ret;
+		return maxId;
 	}
 
 	/**
