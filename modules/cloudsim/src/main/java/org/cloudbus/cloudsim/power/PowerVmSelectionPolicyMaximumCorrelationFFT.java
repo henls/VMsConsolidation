@@ -142,7 +142,7 @@ public class PowerVmSelectionPolicyMaximumCorrelationFFT extends PowerVmSelectio
 		for (int i = 0; i < n; i++){
 			for (int j = 0; j < n; j++) {
 				if (j != i) {
-					x[i][j] = FFTcorrelate.correlate(data[i], data[j])[0];
+					x[i][j] = FFTcorrelate.correlate(stdDataList(data[i]), stdDataList(data[j]))[0];
 				}else{
 					x[i][j] = 0;
 				}
@@ -151,7 +151,35 @@ public class PowerVmSelectionPolicyMaximumCorrelationFFT extends PowerVmSelectio
 		return getMigrateVmId(x);
 	}
 
+	public static double[] stdDataList(double[] inputList) {
+		// 判断是否为空
+		if (inputList == null || inputList.length == 0) {
+			return null;
+		}
+		// 计算平均值、标准差
+		double sum = 0.0;
+		for (double item : inputList) {
+			sum += item;
+		}
+		double mean = sum / inputList.length;
+	
+		double temp = 0.0;
+		for (double item : inputList) {
+			temp += (item - mean) * (item - mean);
+		}
+		double standardDeviation = Math.sqrt(temp / inputList.length);
+	
+		// 计算转换后的值
+		double[] outputList = new double[inputList.length];
+		for (int i = 0; i < inputList.length; i++){
+			outputList[i] = (inputList[i] - mean) / standardDeviation;
+		}
+		
+		return outputList;
+	}
+
 	protected int getMigrateVmId(double[][] data){
+		/*迁移干扰最大的vm */
 		int[] maxId = {0, 0};
 		double max = 0;
 		int n = data.length;

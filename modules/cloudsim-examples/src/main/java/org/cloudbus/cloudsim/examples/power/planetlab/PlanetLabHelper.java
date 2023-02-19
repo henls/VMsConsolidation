@@ -42,7 +42,6 @@ public class PlanetLabHelper {
 		long fileSize = 300;
 		long outputSize = 300;
 		UtilizationModel utilizationModelNull = new UtilizationModelNull();
-
 		File inputFolder = new File(inputFolderName);
 		File[] files = inputFolder.listFiles();
 
