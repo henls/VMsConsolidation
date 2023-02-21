@@ -17,7 +17,8 @@ def changeWorkload(pth, times):
         print('save to {}'.format(saveName))
 
 
-pth = r'/home/wxh/VMsConsolidation/modules/cloudsim-examples/src/main/resources/workload/planetlab/20110303'
-times = 2.5
+# pth = r'/home/wxh/VMsConsolidation/modules/cloudsim-examples/src/main/resources/workload/planetlab/20110303'
+pth = r'/home/wxh/VMsConsolidation/modules/cloudsim-examples/src/main/resources/workload/google/20110501'
+times = 2
 
 changeWorkload(pth, times)

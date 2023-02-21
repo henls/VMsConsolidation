@@ -28,8 +28,10 @@ import org.cloudbus.cloudsim.power.PowerVmSelectionPolicy;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelation;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumMigrationTime;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumUtilization;
+import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyPEACR;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyRandomSelection;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelationFFT;
+import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumUtilization;
 
 /**
  * The Class RunnerAbstract.
@@ -364,6 +366,12 @@ public abstract class RunnerAbstract {
 				break;
 			case "mu":
 				vmSelectionPolicy = new PowerVmSelectionPolicyMinimumUtilization();
+				break;
+			case "maxu":
+				vmSelectionPolicy = new PowerVmSelectionPolicyMaximumUtilization();
+				break;
+			case "peacr":
+				vmSelectionPolicy = new PowerVmSelectionPolicyPEACR();
 				break;
 			case "rs":
 				vmSelectionPolicy = new PowerVmSelectionPolicyRandomSelection();

@@ -33,7 +33,7 @@ public class run_script {
 		boolean enableOutput = true;
 		// boolean outputToFile = false;
 		boolean outputToFile = true;
-		String inputFolder = IqrMc.class.getClassLoader().getResource("workload/planetlab").getPath();
+		String inputFolder = IqrMc.class.getClassLoader().getResource("workload/" + args[4]).getPath();
 		String outputFolder = "output";
 		// String workload = "20110303"; // PlanetLab workload
 		String workload = args[0];
