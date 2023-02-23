@@ -24,6 +24,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.power.lists.PowerVmList;
 import org.cloudbus.cloudsim.util.ExecutionTimeMeasurer;
 
+import org.cloudbus.cloudsim.FFTwxh2.*;
+
 /**
  * An abstract power-aware VM allocation policy that dynamically optimizes the VM
  * allocation (placement) using migration.
@@ -240,6 +242,7 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 	 */
 	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
 		double minPower = Double.MAX_VALUE;
+		double minCorr = Double.MAX_VALUE;
 		PowerHost allocatedHost = null;
 
 		for (PowerHost host : this.<PowerHost> getHostList()) {
@@ -252,15 +255,38 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 				}
 
 				try {
-					double powerAfterAllocation = getPowerAfterAllocation(host, vm);
-					if (powerAfterAllocation != -1) {
-						double powerDiff = powerAfterAllocation - host.getPower();
-						if (powerDiff < minPower) {
-							minPower = powerDiff;
+					/*phase correlation */
+					PowerHostUtilizationHistory _host = (PowerHostUtilizationHistory) host;
+					if (_host.getUtilizationHistory().length > 1){
+					// if (false){
+						PowerVm _vm = (PowerVm) vm;
+						double[] vmUsage = new double[_vm.getUtilizationHistory().size()];
+						int counter = 0;
+						for (double value : _vm.getUtilizationHistory()) {
+							vmUsage[counter] = value;
+							counter += 1;
+						}
+						double corr = FFTcorrelate.correlate(_host.getUtilizationHistory(), vmUsage)[0];
+						if (corr < minCorr) {
+							minCorr = corr;
 							allocatedHost = host;
 						}
 					}
+					/*PABSFD */
+					else{
+						double powerAfterAllocation = getPowerAfterAllocation(host, vm);
+						if (powerAfterAllocation != -1) {
+							double powerDiff = powerAfterAllocation - host.getPower();
+							if (powerDiff < minPower) {
+								minPower = powerDiff;
+								allocatedHost = host;
+							}
+						}
+					}
+					
+
 				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}

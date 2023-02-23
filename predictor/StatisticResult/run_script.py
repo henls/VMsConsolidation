@@ -7,10 +7,10 @@ workloads = [20110306, 20110309, 20110322, 20110325,
 
 # VMselectionStrategy = ['mc', 'fftmc', 'mmt', 'mu', 'rs']
 # VMselectionStrategy = ['peacr']
-VMselectionStrategy = ['mc', 'fftmc', 'mmt', 'peacr']
+VMselectionStrategy = ['fftmc']
 # OverloadedHostDetection = {'thr': 0.8, 'lr': 1.2, 'predThr': 1, 'iqr': 1.5, 'mad': 2.5}
-OverloadedHostDetection = {'lr': 1.2, 'predThr': 1, 'iqr': 1.5}
-# OverloadedHostDetection = {'thr': 0.8}
+# OverloadedHostDetection = {'lr': 1.2, 'predThr': 1, 'iqr': 1.5}
+OverloadedHostDetection = {'predThr': 1}
 
 # workload = 'planetlab'
 workload = 'google'
@@ -33,7 +33,9 @@ def AlgorithmImpact():
     for vmss in VMselectionStrategy:
         for ohd, parameter in OverloadedHostDetection.items():
             # for time in ['20110303-25', '20110303-20', '20110303-15']:
-            for time in ['20110501-15', '20110501-20']:
+            # for time in ['20110501-15', '20110501-20']:
+            # for time in ['20110303-20', '20110303-15']:
+            for time in ['20110501', '20110501-15', '20110501-20']:
                 if ohd != 'predThr':
                     _process = multiprocessing.Process(target = functions, args=(time, ohd, vmss, parameter, workload))
                     _process.start()
@@ -43,8 +45,8 @@ def AlgorithmImpact():
     for vmss in VMselectionStrategy:
         for ohd, parameter in OverloadedHostDetection.items():
             # for time in ['20110303-25', '20110303-20', '20110303-15']:
-            # for time in ['20110501']:
-            for time in ['20110501-15', '20110501-20']:
+            # for time in ['20110303-20', '20110303-15']:
+            for time in ['20110501', '20110501-15', '20110501-20']:
                 if ohd == 'predThr':
                     functions(time, ohd, vmss, parameter, workload)
 AlgorithmImpact()
