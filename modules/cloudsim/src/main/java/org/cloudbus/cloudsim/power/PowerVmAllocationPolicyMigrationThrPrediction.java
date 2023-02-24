@@ -8,11 +8,15 @@
 
 package org.cloudbus.cloudsim.power;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.util.MathUtil;
 
 /**
@@ -50,6 +54,8 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
          * such factors.
          */
 	private double safetyParameter = 0;
+
+	private HashMap<String, Double> hostUtilizationMap = new HashMap<String, Double>();
 
 	/** The fallback VM allocation policy to be used when
          * the IQR over utilization host detection doesn't have
@@ -108,15 +114,53 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 		}
 		addHistoryEntry(host, upperThreshold);
 		double totalRequestedMips = 0;
-		double totalCurrentMips = 0;
-		for (Vm vm : host.getVmList()) {
-			// totalRequestedMips += vm.getCurrentRequestedTotalMips();
-			totalCurrentMips += vm.getCurrentRequestedTotalMips();
-			// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
-			totalRequestedMips += vm.getNextRequestedTotalMips();
+		double utilization = 0;
+		String keyString = "" + host + CloudSim.clock();
+		if (hostUtilizationMap.containsKey(keyString)==false){
+			for (Vm vm : host.getVmList()) {
+				// totalRequestedMips += vm.getCurrentRequestedTotalMips();
+				// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
+				totalRequestedMips += vm.getNextRequestedTotalMips();
+			}
+			utilization = totalRequestedMips / host.getTotalMips();
+			hostUtilizationMap.put("" + host + CloudSim.clock(), utilization);//把时间加进来
+		}else{
+			utilization = hostUtilizationMap.get(keyString);
 		}
-		double utilization = totalRequestedMips / host.getTotalMips();
+		
 		// System.out.println("previous Util : " + previousUtil / host.getTotalMips());
 		return utilization > 1;
+	}
+
+	@Override
+	protected PowerHost getUnderUtilizedHost(Set<? extends Host> excludedHosts) {
+		PowerHost underUtilizedHost = null;
+		for (PowerHost host : this.<PowerHost> getHostList()) {
+			if (excludedHosts.contains(host)) {
+				continue;
+			}
+			
+			double utilization = 0;
+			String keyString = "" + host + CloudSim.clock();
+			double totalRequestedMips = 0;
+			if (hostUtilizationMap.containsKey(keyString)==false){
+
+				for (Vm vm : host.getVmList()) {
+					// totalRequestedMips += vm.getCurrentRequestedTotalMips();
+					// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
+					totalRequestedMips += vm.getNextRequestedTotalMips();
+				}
+				utilization = totalRequestedMips / host.getTotalMips();
+				hostUtilizationMap.put("" + host + CloudSim.clock(), utilization);//把时间加进来
+			}else{
+				utilization = hostUtilizationMap.get(keyString);
+			}
+			if (utilization > 0 && utilization < 0.5
+					&& !areAllVmsMigratingOutOrAnyVmMigratingIn(host)) {
+				underUtilizedHost = host;
+				return underUtilizedHost;
+			}
+		}
+		return underUtilizedHost;
 	}
 }

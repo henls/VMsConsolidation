@@ -3,7 +3,7 @@ from glob import glob
 import re
 
 
-pth = r'/home/wxh/VMsConsolidation/output/log/planetlab/*.txt'
+pth = r'/home/wxh/VMsConsolidation/output/log/*.txt'
 files = sorted(glob(pth))
 dicts = {}
 for idx, txt_file in enumerate(files):
@@ -21,4 +21,4 @@ for idx, txt_file in enumerate(files):
         next = pd.DataFrame(dicts, index=[0])
         current = pd.merge(current, next, how = 'outer')
     print(current)
-current.to_excel('/home/wxh/VMsConsolidation/predictor/result/consolidation_planetlab_result.xlsx')
+current.to_excel('/home/wxh/VMsConsolidation/predictor/result/consolidation_withAllocation_result.xlsx')
