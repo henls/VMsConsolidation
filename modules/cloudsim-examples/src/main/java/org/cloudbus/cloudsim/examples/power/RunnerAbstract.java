@@ -32,6 +32,8 @@ import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyPEACR;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyRandomSelection;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelationFFT;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumUtilization;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyACS_VMC;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyGRANITE;
 
 /**
  * The Class RunnerAbstract.
@@ -254,6 +256,23 @@ public abstract class RunnerAbstract {
 						fallbackVmSelectionPolicy);
 				break;
 			}
+
+			case "ACSVMC": {
+				vmAllocationPolicy = new PowerVmAllocationPolicyACS_VMC(
+						hostList,
+						vmSelectionPolicy,
+						0.8, 0.3);
+				break;
+			}
+
+			case "GRANITE": {
+				vmAllocationPolicy = new PowerVmAllocationPolicyGRANITE(
+						hostList,
+						vmSelectionPolicy,
+						0.8, 0.3);
+				break;
+			}
+
 			case "predIQR": {
 				PowerVmAllocationPolicyMigrationAbstract fallbackVmSelectionPolicy = new PowerVmAllocationPolicyMigrationStaticThreshold(
 						hostList,

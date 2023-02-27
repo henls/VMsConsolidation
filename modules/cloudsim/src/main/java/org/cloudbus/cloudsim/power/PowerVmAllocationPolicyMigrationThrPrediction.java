@@ -114,53 +114,74 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 		}
 		addHistoryEntry(host, upperThreshold);
 		double totalRequestedMips = 0;
-		double utilization = 0;
-		String keyString = "" + host + CloudSim.clock();
-		if (hostUtilizationMap.containsKey(keyString)==false){
-			for (Vm vm : host.getVmList()) {
-				// totalRequestedMips += vm.getCurrentRequestedTotalMips();
-				// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
-				totalRequestedMips += vm.getNextRequestedTotalMips();
-			}
-			utilization = totalRequestedMips / host.getTotalMips();
-			hostUtilizationMap.put("" + host + CloudSim.clock(), utilization);//把时间加进来
-		}else{
-			utilization = hostUtilizationMap.get(keyString);
+		for (Vm vm : host.getVmList()) {
+			totalRequestedMips += vm.getNextRequestedTotalMips();
 		}
+		double utilization = totalRequestedMips / host.getTotalMips();
+		// double utilization = getHostUtilization(host, true);
 		
 		// System.out.println("previous Util : " + previousUtil / host.getTotalMips());
 		return utilization > 1;
 	}
 
-	@Override
-	protected PowerHost getUnderUtilizedHost(Set<? extends Host> excludedHosts) {
-		PowerHost underUtilizedHost = null;
-		for (PowerHost host : this.<PowerHost> getHostList()) {
-			if (excludedHosts.contains(host)) {
-				continue;
-			}
-			
-			double utilization = 0;
-			String keyString = "" + host + CloudSim.clock();
-			double totalRequestedMips = 0;
-			if (hostUtilizationMap.containsKey(keyString)==false){
+	// @Override
+	// protected PowerHost getUnderUtilizedHost(Set<? extends Host> excludedHosts) {
+	// 	PowerHost underUtilizedHost = null;
+	// 	double totalUtilization = 0;
+	// 	double validHost = 0;
 
-				for (Vm vm : host.getVmList()) {
-					// totalRequestedMips += vm.getCurrentRequestedTotalMips();
-					// 这里增加vm.getNextRequestedTotalMips();通过transformer预测得到 wxh
-					totalRequestedMips += vm.getNextRequestedTotalMips();
-				}
-				utilization = totalRequestedMips / host.getTotalMips();
-				hostUtilizationMap.put("" + host + CloudSim.clock(), utilization);//把时间加进来
-			}else{
-				utilization = hostUtilizationMap.get(keyString);
+	// 	for (PowerHost host : this.<PowerHost> getHostList()) {
+	// 		if (excludedHosts.contains(host)) {
+	// 			continue;
+	// 		}
+	// 		validHost += 1;
+	// 		double utilization = getHostUtilization(host, false);
+
+	// 		// double utilization = getHostUtilization(host, false);
+
+	// 		totalUtilization += utilization;
+	// 	}
+
+	// 	double avgUtilization = totalUtilization / validHost;
+
+	// 	for (PowerHost host : this.<PowerHost> getHostList()) {
+	// 		if (excludedHosts.contains(host)) {
+	// 			continue;
+	// 		}
+	// 		double utilization = getHostUtilization(host, false);
+			
+	// 		// double utilization = getHostUtilization(host, true);
+
+	// 		if (utilization > 0 && utilization < 0.8 - avgUtilization
+	// 				&& !areAllVmsMigratingOutOrAnyVmMigratingIn(host)) {
+	// 			underUtilizedHost = host;
+	// 			return underUtilizedHost;
+	// 		}
+	// 	}
+	// 	return underUtilizedHost;
+	// }
+
+	public double getHostUtilization(PowerHost host, boolean nxt){
+		if (nxt == false){
+			double totalRequestedMips = 0;
+			for (Vm vm : host.getVmList()) {
+				totalRequestedMips += vm.getCurrentRequestedTotalMips();
 			}
-			if (utilization > 0 && utilization < 0.5
-					&& !areAllVmsMigratingOutOrAnyVmMigratingIn(host)) {
-				underUtilizedHost = host;
-				return underUtilizedHost;
-			}
+			double utilization = totalRequestedMips / host.getTotalMips();
+			return utilization;
 		}
-		return underUtilizedHost;
+		double totalRequestedMips = 0;
+		String keyString = "" + host + (int) CloudSim.clock();
+		double utilization = 0;
+		if (hostUtilizationMap.containsKey(keyString)==false){
+			for (Vm vm : host.getVmList()) {
+				totalRequestedMips += vm.getNextRequestedTotalMips();
+			}
+			utilization = totalRequestedMips / host.getTotalMips();
+			hostUtilizationMap.put(keyString, utilization);//把时间加进来
+		}else{
+			utilization = hostUtilizationMap.get(keyString);
+		}
+		return utilization;
 	}
 }

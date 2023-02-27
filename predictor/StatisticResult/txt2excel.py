@@ -21,4 +21,4 @@ for idx, txt_file in enumerate(files):
         next = pd.DataFrame(dicts, index=[0])
         current = pd.merge(current, next, how = 'outer')
     print(current)
-current.to_excel('/home/wxh/VMsConsolidation/predictor/result/consolidation_withAllocation_result.xlsx')
+current.to_excel('/home/wxh/VMsConsolidation/predictor/result/consolidation_cap_result.xlsx')
