@@ -9,6 +9,7 @@
 package org.cloudbus.cloudsim.power;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,9 @@ import java.util.Set;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.FFTwxh2.FFTcorrelate;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.power.lists.PowerVmList;
 import org.cloudbus.cloudsim.util.MathUtil;
 
 /**
@@ -37,7 +40,7 @@ import org.cloudbus.cloudsim.util.MathUtil;
  * @since CloudSim Toolkit 3.0
  */
 public class PowerVmAllocationPolicyMigrationThrPrediction extends
-	PowerVmAllocationPolicyMigrationInterQuartileRange {
+	PowerVmAllocationPolicyMigrationInterQuartileRange{
 
 	/** The safety parameter in percentage (at scale from 0 to 1).
          * It is a tuning parameter used by the allocation policy to 
@@ -184,4 +187,59 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 		}
 		return utilization;
 	}
+
+	@Override
+	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
+		double minPower = Double.MAX_VALUE;
+		double minCorr = Double.MAX_VALUE;
+		PowerHost allocatedHost = null;
+
+		for (PowerHost host : this.<PowerHost> getHostList()) {
+			if (excludedHosts.contains(host)) {
+				continue;
+			}
+			if (host.isSuitableForVm(vm)) {
+				if (getUtilizationOfCpuMips(host) != 0 && isHostOverUtilizedAfterAllocation(host, vm)) {
+					continue;
+				}
+
+				try {
+					/*phase correlation */
+					PowerHostUtilizationHistory _host = (PowerHostUtilizationHistory) host;
+					if (_host.getUtilizationHistory().length > 1){
+					// if (false){
+						PowerVm _vm = (PowerVm) vm;
+						double[] vmUsage = new double[_vm.getUtilizationHistory().size()];
+						int counter = 0;
+						for (double value : _vm.getUtilizationHistory()) {
+							vmUsage[counter] = value;
+							counter += 1;
+						}
+						double corr = FFTcorrelate.correlate(_host.getUtilizationHistory(), vmUsage)[0];
+						if (corr < minCorr) {
+							minCorr = corr;
+							allocatedHost = host;
+						}
+					}
+					/*PABSFD */
+					else{
+						double powerAfterAllocation = getPowerAfterAllocation(host, vm);
+						if (powerAfterAllocation != -1) {
+							double powerDiff = powerAfterAllocation - host.getPower();
+							if (powerDiff < minPower) {
+								minPower = powerDiff;
+								allocatedHost = host;
+							}
+						}
+					}
+					
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return allocatedHost;
+	}
+
 }

@@ -17,6 +17,7 @@ import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationAbstract;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationInterQuartileRange;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationInterQuartileRangePrediction;
+import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLMSREGMUP;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLocalRegression;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationLocalRegressionRobust;
 import org.cloudbus.cloudsim.power.PowerVmAllocationPolicyMigrationMedianAbsoluteDeviation;
@@ -28,6 +29,7 @@ import org.cloudbus.cloudsim.power.PowerVmSelectionPolicy;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelation;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumMigrationTime;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMinimumUtilization;
+import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMuP;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyPEACR;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyRandomSelection;
 import org.cloudbus.cloudsim.power.PowerVmSelectionPolicyMaximumCorrelationFFT;
@@ -265,6 +267,13 @@ public abstract class RunnerAbstract {
 				break;
 			}
 
+			case "LMSREGMUP": {
+				vmAllocationPolicy = new PowerVmAllocationPolicyMigrationLMSREGMUP(
+						hostList,
+						vmSelectionPolicy);
+				break;
+			}
+
 			case "GRANITE": {
 				vmAllocationPolicy = new PowerVmAllocationPolicyGRANITE(
 						hostList,
@@ -379,6 +388,9 @@ public abstract class RunnerAbstract {
 			case "fftmc":
 				vmSelectionPolicy = new PowerVmSelectionPolicyMaximumCorrelationFFT(
 						new PowerVmSelectionPolicyMinimumMigrationTime());
+				break;
+			case "MuP":
+				vmSelectionPolicy = new PowerVmSelectionPolicyMuP();
 				break;
 			case "mmt":
 				vmSelectionPolicy = new PowerVmSelectionPolicyMinimumMigrationTime();

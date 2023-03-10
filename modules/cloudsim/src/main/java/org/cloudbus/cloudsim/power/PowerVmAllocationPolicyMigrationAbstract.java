@@ -242,7 +242,6 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 	 */
 	public PowerHost findHostForVm(Vm vm, Set<? extends Host> excludedHosts) {
 		double minPower = Double.MAX_VALUE;
-		double minCorr = Double.MAX_VALUE;
 		PowerHost allocatedHost = null;
 
 		for (PowerHost host : this.<PowerHost> getHostList()) {
@@ -253,38 +252,16 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 				if (getUtilizationOfCpuMips(host) != 0 && isHostOverUtilizedAfterAllocation(host, vm)) {
 					continue;
 				}
-
 				try {
-					/*phase correlation */
-					PowerHostUtilizationHistory _host = (PowerHostUtilizationHistory) host;
-					if (_host.getUtilizationHistory().length > 1){
-					// if (false){
-						PowerVm _vm = (PowerVm) vm;
-						double[] vmUsage = new double[_vm.getUtilizationHistory().size()];
-						int counter = 0;
-						for (double value : _vm.getUtilizationHistory()) {
-							vmUsage[counter] = value;
-							counter += 1;
-						}
-						double corr = FFTcorrelate.correlate(_host.getUtilizationHistory(), vmUsage)[0];
-						if (corr < minCorr) {
-							minCorr = corr;
+					/*PABSFD */
+					double powerAfterAllocation = getPowerAfterAllocation(host, vm);
+					if (powerAfterAllocation != -1) {
+						double powerDiff = powerAfterAllocation - host.getPower();
+						if (powerDiff < minPower) {
+							minPower = powerDiff;
 							allocatedHost = host;
 						}
 					}
-					/*PABSFD */
-					else{
-						double powerAfterAllocation = getPowerAfterAllocation(host, vm);
-						if (powerAfterAllocation != -1) {
-							double powerDiff = powerAfterAllocation - host.getPower();
-							if (powerDiff < minPower) {
-								minPower = powerDiff;
-								allocatedHost = host;
-							}
-						}
-					}
-					
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

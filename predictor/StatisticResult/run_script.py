@@ -5,14 +5,28 @@ import multiprocessing
 workloads = [20110306, 20110309, 20110322, 20110325, 
              20110403, 20110409, 20110411, 20110412, 20110420]
 
+
+
 # VMselectionStrategy = ['mc', 'fftmc', 'mmt', 'mu', 'rs', 'peacr']
-VMselectionStrategy = ['mc', 'fftmc', 'peacr']
-# VMselectionStrategy = ['peacr']
+# VMselectionStrategy = ['mc', 'fftmc', 'peacr']
+
 # VMselectionStrategy = ['mc']
 # OverloadedHostDetection = {'thr': 0.8, 'lr': 1.2, 'predThr': 1, 'iqr': 1.5, 'mad': 2.5, 'ACSVMC': 1}
-OverloadedHostDetection = {'lr': 1.2, 'predThr': 1, 'iqr': 1.5, 'ACSVMC': 1}
+# OverloadedHostDetection = {'lr': 1.2, 'predThr': 1, 'iqr': 1.5, 'ACSVMC': 1}
 # OverloadedHostDetection = {'lr': 1.2, 'predThr': 1, 'iqr': 1.5}
+'''两个基准算法'''
+# VMselectionStrategy = ['mmt', 'mc']
+# OverloadedHostDetection = {'lr': 1.2, 'iqr': 1.5}
+'''群智能算法 ACS_VMC'''
+# VMselectionStrategy = ['mc']
 # OverloadedHostDetection = {'ACSVMC': 1}
+'''启发式算法 LMSREGMUP'''
+# VMselectionStrategy = ['MuP']
+# OverloadedHostDetection = {'LMSREGMUP': 1.5}
+'''提出的算法EI-VMCUP'''
+VMselectionStrategy = ['fftmc']
+OverloadedHostDetection = {'predThr': 1}
+
 
 
 fractile_quantile = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -30,17 +44,13 @@ def DatasetImpact():
 def functions(time, ohd, vmss, parameter, workload):
     os.system("{} {} {} {} {} {}".format(cmd, time, ohd, vmss, parameter, workload))
 
-# times = ['20110303-cap', '20110303-20-cap', '20110303-15-cap', '20110501-cap', '20110501-15-cap', '20110501-20-cap']
-times = ['20110501-cap', '20110501-15-cap', '20110501-20-cap']
+times = ['20110303-cap', '20110303-20-cap', '20110303-15-cap', '20110501-cap', '20110501-15-cap', '20110501-20-cap']
 
 def AlgorithmImpact():
     processes = []
     for vmss in VMselectionStrategy:
         for ohd, parameter in OverloadedHostDetection.items():
-            # for time in ['20110303-25', '20110303-20', '20110303-15']:
-            # for time in ['20110501-15', '20110501-20']:
             for time in times:
-            # for time in ['20110501-cap', '20110501-15-cap', '20110501-20-cap']:
                 if '20110501' in time:
                     workload = 'google'
                 else:
@@ -53,9 +63,7 @@ def AlgorithmImpact():
         _process.join() 
     for vmss in VMselectionStrategy:
         for ohd, parameter in OverloadedHostDetection.items():
-            # for time in ['20110303-25', '20110303-20', '20110303-15']:
             for time in times:
-            # for time in ['20110501-cap', '20110501-15-cap', '20110501-20-cap']:
                 if '20110501' in time:
                     workload = 'google'
                 else:
