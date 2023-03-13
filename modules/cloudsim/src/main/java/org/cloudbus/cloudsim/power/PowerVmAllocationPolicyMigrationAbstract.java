@@ -253,7 +253,7 @@ public abstract class PowerVmAllocationPolicyMigrationAbstract extends PowerVmAl
 					continue;
 				}
 				try {
-					/*PABSFD */
+					/*PABFD */
 					double powerAfterAllocation = getPowerAfterAllocation(host, vm);
 					if (powerAfterAllocation != -1) {
 						double powerDiff = powerAfterAllocation - host.getPower();

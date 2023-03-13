@@ -28,6 +28,9 @@ package org.cloudbus.cloudsim.power.models;
 public abstract class PowerModelSpecPower implements PowerModel {
 	@Override
 	public double getPower(double utilization) throws IllegalArgumentException {
+		if (utilization - 1 < 0.01 && utilization > 1) {
+			utilization = 1.0;
+		}
 		if (utilization < 0 || utilization > 1) {
 			System.out.println(utilization);
 			throw new IllegalArgumentException("Utilization value must be between 0 and 1");

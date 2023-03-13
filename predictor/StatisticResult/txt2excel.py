@@ -9,7 +9,10 @@ dicts = {}
 for idx, txt_file in enumerate(files):
     with open(txt_file, 'r') as f:
         data = f.read()
-    data = data[data.index('Experiment name'):].strip().split('\n')
+    try:
+        data = data[data.index('Experiment name'):].strip().split('\n')
+    except ValueError:
+        continue
     for d in data:
         [k, v] = d.split(': ')
         if ',' in v:
@@ -21,4 +24,4 @@ for idx, txt_file in enumerate(files):
         next = pd.DataFrame(dicts, index=[0])
         current = pd.merge(current, next, how = 'outer')
     print(current)
-current.to_excel('/home/wxh/VMsConsolidation/predictor/result/consolidation_cap_result.xlsx')
+current.to_excel('/home/wxh/VMsConsolidation/predictor/result/consolidation_cap_result-correct(diff placement strategy).xlsx')

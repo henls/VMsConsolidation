@@ -32,9 +32,9 @@ public class LrMmt {
 	public static void main(String[] args) throws IOException {
 		boolean enableOutput = true;
 		boolean outputToFile = false;
-		String inputFolder = LrMmt.class.getClassLoader().getResource("workload/planetlab").getPath();
+		String inputFolder = LrMmt.class.getClassLoader().getResource("workload/google").getPath();
 		String outputFolder = "output";
-		String workload = "20110303"; // PlanetLab workload
+		String workload = "20110501-20-cap"; // PlanetLab workload
 		String vmAllocationPolicy = "lr"; // Local Regression (LR) VM allocation policy
 		String vmSelectionPolicy = "mmt"; // Minimum Migration Time (MMT) VM selection policy
 		String parameter = "1.2"; // the safety parameter of the LR policy

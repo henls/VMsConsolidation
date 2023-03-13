@@ -242,4 +242,23 @@ public class PowerVmAllocationPolicyMigrationThrPrediction extends
 		return allocatedHost;
 	}
 
+	@Override
+	protected List<Map<String, Object>> getNewVmPlacement(
+			List<? extends Vm> vmsToMigrate,
+			Set<? extends Host> excludedHosts) {
+		List<Map<String, Object>> migrationMap = new LinkedList<>();
+		PowerVmList.sortByQuantileCpuUtilization(vmsToMigrate);
+		for (Vm vm : vmsToMigrate) {
+			PowerHost allocatedHost = findHostForVm(vm, excludedHosts);
+			if (allocatedHost != null) {
+				allocatedHost.vmCreate(vm);
+				Log.printConcatLine("VM #", vm.getId(), " allocated to host #", allocatedHost.getId());
+				Map<String, Object> migrate = new HashMap<>();
+				migrate.put("vm", vm);
+				migrate.put("host", allocatedHost);
+				migrationMap.add(migrate);
+			}
+		}
+		return migrationMap;
+	}
 }

@@ -17,6 +17,8 @@ workloads = [20110306, 20110309, 20110322, 20110325,
 '''两个基准算法'''
 # VMselectionStrategy = ['mmt', 'mc']
 # OverloadedHostDetection = {'lr': 1.2, 'iqr': 1.5}
+VMselectionStrategy = ['fftmc']
+OverloadedHostDetection = {'predThr': 1}
 '''群智能算法 ACS_VMC'''
 # VMselectionStrategy = ['mc']
 # OverloadedHostDetection = {'ACSVMC': 1}
@@ -24,8 +26,8 @@ workloads = [20110306, 20110309, 20110322, 20110325,
 # VMselectionStrategy = ['MuP']
 # OverloadedHostDetection = {'LMSREGMUP': 1.5}
 '''提出的算法EI-VMCUP'''
-VMselectionStrategy = ['fftmc']
-OverloadedHostDetection = {'predThr': 1}
+# VMselectionStrategy = ['fftmc']
+# OverloadedHostDetection = {'predThr': 1}
 
 
 
@@ -45,7 +47,6 @@ def functions(time, ohd, vmss, parameter, workload):
     os.system("{} {} {} {} {} {}".format(cmd, time, ohd, vmss, parameter, workload))
 
 times = ['20110303-cap', '20110303-20-cap', '20110303-15-cap', '20110501-cap', '20110501-15-cap', '20110501-20-cap']
-
 def AlgorithmImpact():
     processes = []
     for vmss in VMselectionStrategy:

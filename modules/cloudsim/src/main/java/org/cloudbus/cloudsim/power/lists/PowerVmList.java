@@ -8,6 +8,7 @@
 
 package org.cloudbus.cloudsim.power.lists;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -53,6 +54,27 @@ public class PowerVmList extends VmList {
 		vmList.sort((a, b) -> {
 			Double aUtilization = a.getTotalUtilizationOfCpuMips(CloudSim.clock());
 			Double bUtilization = b.getTotalUtilizationOfCpuMips(CloudSim.clock());
+			return bUtilization.compareTo(aUtilization);
+		});
+	}
+
+	private static Double getQuantile(Vm vm){
+		if ((int) CloudSim.clock() / 300 <= 10){
+			return vm.getTotalUtilizationOfCpuMips(CloudSim.clock());
+		}
+		List<Double> ListUtilization = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			ListUtilization.add(vm.getTotalUtilizationOfCpuMips(CloudSim.clock() - i*300));
+		}
+		ListUtilization.sort((a, b) -> {return b.compareTo(b);});
+		Collections.sort(ListUtilization);
+		return ListUtilization.get(7);
+	}
+
+	public static <T extends Vm> void sortByQuantileCpuUtilization(List<T> vmList) {
+		vmList.sort((a, b) -> {
+			Double aUtilization = getQuantile(a);
+			Double bUtilization = getQuantile(b);
 			return bUtilization.compareTo(aUtilization);
 		});
 	}
